@@ -1,0 +1,83 @@
+{
+  "name": "ng-di-transpiler",
+  "displayName": "NG DI Transpiler",
+  "version": "0.0.0-semantically-released",
+  "description": "DI Transpiler for Angular",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "bin": {
+    "ngdt": "./bin/ngdt"
+  },
+  "scripts": {
+    "ngdt": "node bin/ngdt",
+    "commit": "git-cz",
+    "lint": "tslint src/**/*.ts",
+    "build": "npm-run-all -p build:cli build:main",
+    "build:cli": "npm run build:cli:rollup",
+    "prebuild:cli:rollup": "shx rm -rf bin/ngdt",
+    "build:cli:rollup": "rollup -c rollup.config.cli.js",
+    "postbuild:cli:rollup": "shx chmod a+x bin/ngdt",
+    "build:main": "npm run build:main:ts",
+    "prebuild:main:ts": "shx rm -rf dist",
+    "build:main:ts": "tsc",
+    "prepublish": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  },
+  "homepage": "https://github.com/gund/ng-di-transpiler",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gund/ng-di-transpiler"
+  },
+  "bugs": {
+    "url": "https://github.com/gund/ng-di-transpiler/issues"
+  },
+  "man": [
+    "./bin/help.md"
+  ],
+  "keywords": [
+    "ng",
+    "angular",
+    "angular2",
+    "di",
+    "transpiler",
+    "compiler",
+    "ioc"
+  ],
+  "author": {
+    "name": "Alex Malkevich",
+    "email": "malkevich.alex@gmail.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "devDependencies": {
+    "@types/core-js": "^0.9.35",
+    "@types/glob": "^5.0.30",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^7.0.0",
+    "commitizen": "^2.9.5",
+    "cz-conventional-changelog": "^1.2.0",
+    "npm-run-all": "^4.0.0",
+    "rollup": "^0.41.3",
+    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-json": "^2.1.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-string": "^2.0.2",
+    "rollup-plugin-typescript": "^0.8.1",
+    "semantic-release": "^6.3.2",
+    "shx": "^0.2.2",
+    "tslint": "^3.0.0"
+  },
+  "dependencies": {
+    "glob": "^7.1.1",
+    "minimist": "^1.2.0",
+    "typescript": "^2.1.5"
+  }
+}
