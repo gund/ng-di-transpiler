@@ -12,6 +12,12 @@ This is still in early stages but fully functional already.
 
 See [this](https://github.com/gund/ioc-compiler-poc#about).
 
+## Installation
+
+```bash
+$ npm install ng-di-transpiler --save
+```
+
 ## Usage
 
 Via CLI available as `ngdt`.
