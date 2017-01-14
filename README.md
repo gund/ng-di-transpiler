@@ -29,6 +29,15 @@ Generated files will live along originals but named `%file_name%.compiled.ts`.
 
 For CLI usage run `ngdt -h`.
 
+## Testing
+
+To see it in action clone this repo do normal `npm install` and then run:
+```bash
+$ npm ngdt
+```
+
+And then take a look at `src/test` folder to see compiled files.
+
 ## Development
 
 To build project run:
