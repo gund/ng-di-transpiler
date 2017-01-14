@@ -1,7 +1,7 @@
 {
   "name": "ng-di-transpiler",
   "displayName": "NG DI Transpiler",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DI Transpiler for Angular",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
