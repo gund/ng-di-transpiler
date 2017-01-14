@@ -14,3 +14,12 @@ export abstract class TokenProvider<T> {
   multi = false;
   constructor(public value: Type<T>) { }
 }
+
+/**
+ * @experimental
+ * @description
+ * Helps inject token and use its declared type interface
+ */
+export function interfaceAsType<T>(i: T): Type<T> {
+  return new Object() as Type<T>;
+}
