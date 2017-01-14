@@ -24,7 +24,7 @@ Via CLI available as `ngdt`.
 
 To integrate with your build run this command just before build begins.
 
-By default it will look and transpile file matching globe `src/**/providers.*.ts`.
+By default it will look and transpile file matching globe `src/**/providers.*.ts`.  
 Generated files will live along originals but named `%file_name%.compiled.ts`.
 
 For CLI usage run `ngdt -h`.
@@ -37,7 +37,7 @@ To build project run:
 $ npm run build
 ```
 
-No tests yet and so no coverage and no travis - so no automatic deployment =)
+No tests yet and so no coverage and no travis - so no automatic deployment =)  
 Just yet!
 
 ## License
