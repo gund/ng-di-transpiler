@@ -1,3 +1,4 @@
+import { DEFAULT_MULTI, DEFAULT_PROVIDEAS } from '../../../src/token-provider';
 import { TOKEN_PROVIDERS_STRING } from '../../../src/token-providers';
 import { NgdtConfig } from '../config';
 import { error, log } from '../logging';
@@ -153,9 +154,9 @@ export function generateProviderFromTokenInfo(
   const multiDecl = getPropertyDeclaration(multiSymbol);
 
   const provideStr = provideDecl.initializer.getText();
-  const provideAsStr = stripStringExpressionName(provideAsDecl.initializer);
-  const depsStr = depsDecl.initializer.getText();
-  const multiStr = multiDecl.initializer.getText();
+  const provideAsStr = stripStringExpressionName(provideAsDecl.initializer) || DEFAULT_PROVIDEAS;
+  const depsStr = depsDecl.initializer ? depsDecl.initializer.getText() : '[]';
+  const multiStr = multiDecl.initializer ? multiDecl.initializer.getText() : `${DEFAULT_MULTI}`;
   const valueStr = valueIdentifier.getText();
 
   const providerStr = `
@@ -165,7 +166,7 @@ export function generateProviderFromTokenInfo(
 
   const imports = [provideDecl.initializer, valueIdentifier];
 
-  const depsInitializer = depsDecl.initializer;
+  const depsInitializer = depsDecl.initializer || <any>{};
   if (depsInitializer.kind === ts.SyntaxKind.ArrayLiteralExpression) {
     imports.push(...(<any>depsInitializer).elements);
   }

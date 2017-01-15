@@ -2,6 +2,9 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
+export const DEFAULT_PROVIDEAS = 'useClass';
+export const DEFAULT_MULTI = false;
+
 /**
  * @description
  * Keeps Token (@prop provide) and required implementation (T) in pair
@@ -9,9 +12,9 @@ export interface Type<T> extends Function {
  */
 export abstract class TokenProvider<T> {
   abstract provide: any;
-  provideAs = 'useClass';
+  provideAs = DEFAULT_PROVIDEAS;
   deps = [];
-  multi = false;
+  multi = DEFAULT_MULTI;
   constructor(public value: Type<T>) { }
 }
 
