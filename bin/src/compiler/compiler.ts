@@ -155,14 +155,13 @@ export function generateProviderFromTokenInfo(
 
   const provideStr = provideDecl.initializer.getText();
   const provideAsStr = stripStringExpressionName(provideAsDecl.initializer) || DEFAULT_PROVIDEAS;
-  const depsStr = depsDecl.initializer ? depsDecl.initializer.getText() : '[]';
+  const depsStr = depsDecl.initializer ? depsDecl.initializer.getText() : 'undefined';
   const multiStr = multiDecl.initializer ? multiDecl.initializer.getText() : `${DEFAULT_MULTI}`;
   const valueStr = valueIdentifier.getText();
 
-  const providerStr = `
-    {provide: ${provideStr}, ${provideAsStr}: ${valueStr}, deps: ${depsStr
-    }, multi: ${multiStr}}
-  `.trim();
+  const providerStr = provideAsStr === 'useClass' ?
+    `{${valueStr}}` :
+    `{provide: ${provideStr}, ${provideAsStr}: ${valueStr}, deps: ${depsStr}, multi: ${multiStr}}`;
 
   const imports = [provideDecl.initializer, valueIdentifier];
 
