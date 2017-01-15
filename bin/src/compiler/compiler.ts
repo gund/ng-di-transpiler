@@ -159,8 +159,7 @@ export function generateProviderFromTokenInfo(
   const multiStr = multiDecl.initializer ? multiDecl.initializer.getText() : `${DEFAULT_MULTI}`;
   const valueStr = valueIdentifier.getText();
 
-  const providerStr = provideAsStr === 'useClass' ?
-    `{${valueStr}}` :
+  const providerStr =
     `{provide: ${provideStr}, ${provideAsStr}: ${valueStr}, deps: ${depsStr}, multi: ${multiStr}}`;
 
   const imports = [provideDecl.initializer, valueIdentifier];
