@@ -8,6 +8,7 @@ export function renderHelp(): string {
     .replace('__VERSION__', version)
     .replace('__DISPLAY_NAME__', displayName)
     .replace('__WIKI__', homepage)
+    .replace('__CONF_FILES__', `[${DEFAULT_CONFIG.files.join(', ')}]`)
     .replace('__CONF_TSCONFIG__', DEFAULT_CONFIG.tsconfigFile)
     .replace('__CONF_POSTFIX__', DEFAULT_CONFIG.postfix);
 }

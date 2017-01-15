@@ -4,7 +4,7 @@ __DISPLAY_NAME__
 
 Usage: ngdt [options] <glob-files>
 
-<glob-files>      List of files using glob pattern
+<glob-files>      List of files using glob pattern, by default `__CONF_FILES__`
 
 Options:
 
