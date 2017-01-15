@@ -72,23 +72,14 @@ export function stripStringExpressionName(expr: ts.Expression): string {
 }
 
 export function getExpressionImport(
-  expr: ts.Expression, checker: ts.TypeChecker, relativeTo?: string): ImportNotation {
+  expr: ts.Expression, checker: ts.TypeChecker, prog: ts.Program, relativeTo?: string): ImportNotation {
   if (expr.kind !== ts.SyntaxKind.Identifier) {
     return null;
   }
 
-  const type = checker.getTypeAtLocation(expr);
-  const originalSymbol = (<any>type.symbol).parent as ts.Symbol;
-
-  let fullPath = '';
-  if (originalSymbol) {
-    fullPath = originalSymbol.name.replace(/\"/g, '');
-  } else {
-    fullPath = (<ts.Identifier>expr).getSourceFile().fileName;
-  }
-
+  const fullPath = resolveIdentifierLocation(<any>expr, checker, prog);
+  const pathTo = fullPath.replace('.ts', '');
   const name = expr.getText();
-  let pathTo = fullPath.replace('.ts', '');
 
   return {
     names: [name], path: normalizePath(path.relative(relativeTo, pathTo))
@@ -125,7 +116,7 @@ export function renderImports(imports: ImportNotation[]): string {
 }
 
 export function renderProviders(providers: string[], name: string, varType: string): string {
-  const startStr = `${varType} ${name} = [\n  `;
+  const startStr = `export ${varType} ${name} = [\n  `;
   const endStr = `\n];`;
   return startStr + providers.join(',\n  ') + endStr;
 }
@@ -173,4 +164,60 @@ export function normalizeDelimiters(path: string): string {
 
 export function getBasedirFromFile(file: string): string {
   return normalizeDelimiters(path.parse(file).dir);
+}
+
+export function resolveIdentifierLocation(identifier: ts.Identifier, checker: ts.TypeChecker, prog: ts.Program): string {
+  const symbol = checker.getSymbolAtLocation(identifier);
+  const sourceFile = identifier.getSourceFile();
+  let location = sourceFile.fileName;
+
+  if (symbol.getDeclarations()[0].kind === ts.SyntaxKind.ImportSpecifier) {
+    const importDecl = getIdentifierImport(identifier, sourceFile.statements);
+
+    if (importDecl) {
+      const newLoc = mergeFilenameWithExpression(location, importDecl.moduleSpecifier);
+      const newFile = resolveRelativeTsFile(newLoc, prog);
+
+      if (newFile) {
+        location = newFile.fileName;
+      }
+    }
+  }
+
+  return location;
+}
+
+export function mergeFilenameWithExpression(fileName: string, expr: ts.Expression): string {
+  return normalizePath(path.normalize(getBasedirFromFile(fileName) + '/' + stripStringExpressionName(expr)));
+}
+
+export function resolveRelativeTsFile(fileName: string, prog: ts.Program): ts.SourceFile {
+  return prog.getSourceFile(fileName) ||
+    prog.getSourceFile(fileName + '.ts') ||
+    prog.getSourceFile(fileName + '.tsx') ||
+    prog.getSourceFile(fileName + '/index.tsx') ||
+    prog.getSourceFile(fileName + '/index.ts');
+}
+
+export function getIdentifierImport(identifier: ts.Identifier, stmts: ts.NodeArray<ts.Statement>): ts.ImportDeclaration {
+  const identText = identifier.getText();
+  const importStmts = <ts.NodeArray<ts.ImportDeclaration>>
+    stmts.filter(isNodeOfKind(ts.SyntaxKind.ImportDeclaration));
+
+  return importStmts
+    .filter(s => {
+      if (s.importClause.name) {
+        return s.importClause.name.getText() === identText;
+      }
+      if (s.importClause.namedBindings) {
+        if (s.importClause.namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+          return s.importClause.namedBindings.name.getText() === identText;
+        }
+        if (s.importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
+          return s.importClause.namedBindings.elements.some(i => i.getText() === identText);
+        }
+      }
+      return false;
+    })
+    .shift();
 }

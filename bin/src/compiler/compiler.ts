@@ -85,7 +85,7 @@ export function compileFile(fileName: string, path: string, config: NgdtConfig):
     const tokenInfo = collectTokenInfo(expr, valueIdentifier, checker);
 
     return generateProviderFromTokenInfo(
-      tokenInfo.tokenSymbol, valueIdentifier, tokenInfo.tokenMembers, checker, path);
+      tokenInfo.tokenSymbol, valueIdentifier, tokenInfo.tokenMembers, checker, program, path);
   });
 
   const imports = providers
@@ -142,7 +142,7 @@ export function collectTokenInfo(
 
 export function generateProviderFromTokenInfo(
   tokenSymbol: ts.Symbol, valueIdentifier: ts.Identifier,
-  tokenMembers: ts.Map<ts.Symbol>, checker: ts.TypeChecker, path: string) {
+  tokenMembers: ts.Map<ts.Symbol>, checker: ts.TypeChecker, prog: ts.Program, path: string) {
   const provideSymbol = tokenMembers['provide'];
   const provideAsSymbol = tokenMembers['provideAs'];
   const depsSymbol = tokenMembers['deps'];
@@ -171,10 +171,10 @@ export function generateProviderFromTokenInfo(
     imports.push(...(<any>depsInitializer).elements);
   }
 
-  return { providerStr, imports: getImportsFor(imports, checker, path) };
+  return { providerStr, imports: getImportsFor(imports, checker, prog, path) };
 }
 
 export function getImportsFor(
-  expressions: ts.Expression[], checker: ts.TypeChecker, path: string): ImportNotation[] {
-  return expressions.map(expr => getExpressionImport(expr, checker, path));
+  expressions: ts.Expression[], checker: ts.TypeChecker, prog: ts.Program, path: string): ImportNotation[] {
+  return expressions.map(expr => getExpressionImport(expr, checker, prog, path));
 }
