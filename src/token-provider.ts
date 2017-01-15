@@ -2,7 +2,7 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
-export const DEFAULT_PROVIDEAS = 'useClass';
+export const DEFAULT_PROVIDEAS = 'useClass' as string;
 export const DEFAULT_MULTI = false;
 
 /**
