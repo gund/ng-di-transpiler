@@ -51,7 +51,7 @@ Generated files will live along originals but named `%file_name%.compiled.ts`.
 
 For CLI usage run `ngdt -h`.
 
-You can also customize transpiler by providing config in your `tsconfig.json`:
+You can also customize transpiler by providing `ngdtOptions` in your `tsconfig.json`:
 ```json
 {
   "ngdtOptions": {
@@ -61,14 +61,97 @@ You can also customize transpiler by providing config in your `tsconfig.json`:
 }
 ```
 
-## Testing
+## Example use-case
 
-To see it in action clone this repo do normal `npm install` and then run:
-```bash
-$ npm ngdt
+Suppose your app requires some interfaces to be provided to different platforms.  
+We will start off be specifying wich providers should be provided and what interfaces they should implement:
+```ts
+// ./src/core/platform/platform-tokens.ts
+import { TokenProviders, TokenProvider } from 'ng-di-transpiler';
+import { CONSOLE_TOKEN, ConsoleInterface } from './console'; // <-- Here are some definitions
+import { STORAGE_TOKEN, StorageInterface } from './storage'; // <-- of interfaces and tokens to provide
+
+export interface PlatformTokens extends TokenProviders {
+  console: ConsoleProvider;
+  storage: StorageProvider;
+}
+
+export class ConsoleProvider extends TokenProvider<ConsoleInterface> {
+  provider: CONSOLE_TOKEN; // <-- This might be instance of `OpaqueToken`
+}
+
+export class StorageProvider extends TokenProvider<StorageInterface> {
+  provider: STORAGE_TOKEN; // <-- This is yet another instance of `OpaqueToken`
+}
 ```
 
-And then take a look at `src/test` folder to see compiled files.
+Now it's time to provide real implementations for each specific platform.
+Let's do first for Browser:
+```ts
+// ./src/core/platform/providers.browser.ts
+import { PlatformTokens, ConsoleProvider, StorageProvider } from './platform-tokens';
+import { ConsoleLogger } from './browser/console-logger'; // <-- Get platform specific
+import { LocalStorage } from './browser/local-storage';   // <-- implementations
+
+export const TOKENS: PlatformTokens = { // <-- Type is important here: 1. For type based analysis; 2. To detect right variable to compile
+  console: new ConsoleProvider(ConsoleLogger);
+  storage: new StorageProvider(LocalStorage);
+};
+```
+
+Now let's provide implementations maybe for mobile:
+```ts
+// ./src/core/platform/providers.mobile.ts
+import { PlatformTokens, ConsoleProvider, StorageProvider } from './platform-tokens';
+import { MobileLogger } from './mobile/logger';   // <-- Get platform specific
+import { MobileStorage } from './mobile/storage'; // <-- implementations
+
+export const TOKENS: PlatformTokens = { // <-- Same interface here will remind us to provide everything our app needs and with right implementations!
+  console: new ConsoleProvider(MobileLogger);
+  storage: new StorageProvider(MobileStorage);
+};
+```
+
+Thanks to this structure we can easily manage large amount of tokens for different platforms
+ae we will get static analisys of our tokens.  
+
+If we will run `ngdt` against this files above, we will have next files generated:
+- ./src/core/platform/providers.browser.compiled.ts (from providers.browser.ts)
+- ./src/core/platform/providers.mobile.compiled.ts (from providers.mobile.ts)
+
+So we can safely include one of them depending for which platform we compiling our app.  
+We can keep our target platform in global variable `TARGET` and provide it at compile time
+via Webpack's `DefinePlugin` or some similar technique and create next final file for platform tokens:
+```ts
+// ./src/core/platform/index.ts
+let PLATFORM_TOKENS = [];
+
+if (TARGET === 'browser') {
+  PLATFORM_TOKENS = require('./providers.browser.compiled.ts').TOKENS || [];
+} else if (TARGET === 'mobile') {
+  PLATFORM_TOKENS = require('./providers.mobile.compiled.ts').TOKENS || [];
+}
+
+export { PLATFORM_TOKENS };
+```
+
+NOTE: We could use `import` statements here but Webpack would not eliminate those unused imports so
+`require` will make sure that our final bundle will have only neccessary tokens for selected platform.
+
+And then we just consume our providers as usual in our AppModule:
+```ts
+// ./src/app.module.ts
+import { PLATFORM_TOKENS } from './core/platform';
+
+@NgModule({
+  // ...Other config
+  providers: [
+    ...PLATFORM_TOKENS,
+    // ...Other providers
+  ]
+})
+export class AppModule { }
+```
 
 ## Development
 
